@@ -28,3 +28,12 @@ type OrderInfo struct {
 	TotalAmount     float64
 	DeliveredAmount float64
 }
+
+// OrderInfoQuery query for orders
+type OrderInfoQuery struct {
+	PartOfOrderName   string
+	PartOfProductName string
+	DateFrom          string // conforms to RFC3339
+	DateTill          string // conforms to RFC3339
+}
+
