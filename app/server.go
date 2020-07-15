@@ -20,6 +20,9 @@ func heartbeat(w http.ResponseWriter, r *http.Request) {
 func orders(w http.ResponseWriter, r *http.Request) {
 	orderMgr := models.NewOrderManager(utils.Config)
 	orders := orderMgr.GetAll()
+	cstmrMgr := models.NewCustomerManager(utils.Config)
+	cstmrMgr.FillInCustomerInfo(orders)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(orders)
 }
@@ -31,6 +34,9 @@ func searchOrders(w http.ResponseWriter, r *http.Request) {
 	
 	orderMgr := models.NewOrderManager(utils.Config)
 	orders := orderMgr.Search(&orderQuery)
+	cstmrMgr := models.NewCustomerManager(utils.Config)
+	cstmrMgr.FillInCustomerInfo(orders)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(orders)
 }
