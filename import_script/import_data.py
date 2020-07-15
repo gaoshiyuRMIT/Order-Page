@@ -95,7 +95,7 @@ class ImportPostgres(object):
 
 
 if __name__ == '__main__':
-    cfg = ConfigManager('config.json')
+    cfg = ConfigManager('../config.json')
     ImportMongo(cfg).import_data(
         "customer_companies", 
         'test_data/Test task - Mongo - customer_companies.csv',

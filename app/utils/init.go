@@ -4,5 +4,5 @@ package utils
 var Config *ConfigReader
 
 func init() {
-	Config = NewConfigReader("config.json")
+	Config = NewConfigReader("../config.json")
 }
