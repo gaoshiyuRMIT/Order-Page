@@ -3,9 +3,9 @@ package models
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"strings"
 	"time"
+	"log"
 
 	"app/utils"
 )
@@ -18,11 +18,11 @@ type OrderManager struct {
 // NewOrderManager constructor
 func NewOrderManager(cfg *utils.ConfigReader) *OrderManager {
 	om := &OrderManager{}
-	om.db = cfg.GetPostgresDB()
+	om.db = cfg.PostgresDB
 	return om
 }
 
-func (mgr OrderManager) generateWhereClause(q *OrderInfoQuery) (string, []interface{}) {
+func (mgr OrderManager) generateWhereClause(q *OrderInfoQuery) (string, []interface{}, error) {
 	conditions := []string{}
 	values := []interface{}{}
 	argNo := 1
@@ -32,23 +32,31 @@ func (mgr OrderManager) generateWhereClause(q *OrderInfoQuery) (string, []interf
 		conditions = append(conditions, cond)
 		values = append(values, "%" + q.PartOfName + "%")
 	}
-	if _, err := time.Parse(time.RFC3339, q.DateFrom); err == nil {
-		cond := fmt.Sprintf("created_at >= $%d", argNo)
-		argNo++
-		conditions = append(conditions, cond)
-		values = append(values, q.DateFrom)
+	if q.DateFrom != "" {
+		if _, err := time.Parse(time.RFC3339, q.DateFrom); err == nil {
+			cond := fmt.Sprintf("created_at >= $%d", argNo)
+			argNo++
+			conditions = append(conditions, cond)
+			values = append(values, q.DateFrom)
+		} else {
+			return "", nil, utils.NewIllegalArgument("time values should conform to RFC3339")
+		}
 	}
-	if _, err := time.Parse(time.RFC3339, q.DateTill); err == nil {
-		cond := fmt.Sprintf("created_at < $%d", argNo)
-		argNo++
-		conditions = append(conditions, cond)
-		values = append(values, q.DateTill)
+	if q.DateTill != "" {
+		if _, err := time.Parse(time.RFC3339, q.DateTill); err == nil {
+			cond := fmt.Sprintf("created_at < $%d", argNo)
+			argNo++
+			conditions = append(conditions, cond)
+			values = append(values, q.DateTill)
+		} else {
+			return "", nil, utils.NewIllegalArgument("time values should conform to RFC3339")
+		}
 	}
 	clause := ""
 	if len(conditions) > 0 {
 		clause = "where " + strings.Join(conditions, " and ")
 	}
-	return clause, values
+	return clause, values, nil
 }
 
 func (mgr OrderManager) generateLimitOffset(pg *Pagination, values []interface{}) (string, []interface{}) {
@@ -62,7 +70,7 @@ func (mgr OrderManager) generateLimitOffset(pg *Pagination, values []interface{}
 }
 
 // Search search for orders
-func (mgr OrderManager) Search(qry *OrderInfoQuery, pg *Pagination) []OrderInfo {
+func (mgr OrderManager) Search(qry *OrderInfoQuery, pg *Pagination) ([]OrderInfo, error) {
 	sqlFmt := `
 		select O.id, O.order_name, O.created_at, O.customer_id, 
 			sum(OI.quantity * price_per_unit) as total_amount, 
@@ -74,28 +82,34 @@ func (mgr OrderManager) Search(qry *OrderInfoQuery, pg *Pagination) []OrderInfo 
 		group by O.id
 		%s`
 
-	whereClause, values := mgr.generateWhereClause(qry)
+	whereClause, values, err := mgr.generateWhereClause(qry)
+	if (err != nil) {
+		return nil, err
+	}
 	limitOffset, values := mgr.generateLimitOffset(pg, values)
 
 	sql := fmt.Sprintf(sqlFmt, whereClause, limitOffset)
 
 	stmt, err := mgr.db.Prepare(sql)
 	if err != nil {
-		log.Fatal("preparing statement failed,", err)
+		return nil, fmt.Errorf("Preparing sql statement failed. %w", err)
 	}
 	defer stmt.Close()
 
 	rows, err := stmt.Query(values...)
 	if err != nil {
-		log.Fatal("querying failed,", err)
+		return nil, fmt.Errorf("Querying database failed. %w", err)
 	}
 
 	orderInfos := []OrderInfo{}
 
 	for rows.Next() {
 		var oi OrderInfo
-		rows.Scan(&oi.OrderID, &oi.OrderName, &oi.CreatedAt, &oi.CustomerID, &oi.TotalAmount, &oi.DeliveredAmount)
+		err := rows.Scan(&oi.OrderID, &oi.OrderName, &oi.CreatedAt, &oi.CustomerID, &oi.TotalAmount, &oi.DeliveredAmount)
+		if (err != nil) {
+			log.Printf("Structuring returned data failed.", err.Error())
+		}
 		orderInfos = append(orderInfos, oi)
 	}
-	return orderInfos
+	return orderInfos, nil
 }

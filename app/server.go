@@ -26,9 +26,18 @@ func searchOrders(w http.ResponseWriter, r *http.Request) {
 	schema.NewDecoder().Decode(pagination, queryVals)
 	
 	orderMgr := models.NewOrderManager(utils.Config)
-	orders := orderMgr.Search(&orderQuery, pagination)
-	cstmrMgr := models.NewCustomerManager(utils.Config)
-	cstmrMgr.FillInCustomerInfo(orders)
+	orders, err := orderMgr.Search(&orderQuery, pagination)
+	if err != nil {
+		utils.WriteHttpError(w, err)
+	}
+	cstmrMgr, err := models.NewCustomerManager(utils.Config)
+	if err != nil {
+		utils.WriteHttpError(w, err)
+	}
+	err = cstmrMgr.FillInCustomerInfo(orders)
+	if err != nil {
+		utils.WriteHttpError(w, err)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
