@@ -21,6 +21,7 @@ First make sure you have the API running, and you are in `clientapp`.
 - Specify the base URL of your backend API in `config.js` (refer to `config.example.js`)
 
 #### Usage
+- All the files in this folder are static, so you can host them on any website hosting platform.
 - Open `index.html`.
 
 
