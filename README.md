@@ -1,8 +1,10 @@
-### General Setup
+## General Setup
 #### Edit configuration files
-- Specify database connection details in `config.json` (refer to `config.example.json`)
+- Specify these details in `config.json` (refer to `config.example.json`)
+    * port number to run the API on
+    * database connection details
 
-### API
+## API
 Make sure you are in `app`: `cd app`
 
 #### Setup
@@ -12,7 +14,17 @@ Make sure you are in `app`: `cd app`
 - `go run server.go`
 
 
-### Data Import
+## Client App
+First make sure you have the API running, and you are in `clientapp`.
+
+#### Setup
+- Specify the base URL of your backend API in `config.js` (refer to `config.example.js`)
+
+#### Usage
+- Open `index.html`.
+
+
+## Data Import
 Make sure you are in `import_script`: `cd import_script`
 
 #### Set up the virtual environment

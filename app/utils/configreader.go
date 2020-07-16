@@ -48,6 +48,8 @@ func (cfg ConfigReader) GetPostgresDB() *sql.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(5)
 	return db
 }
 
@@ -60,4 +62,9 @@ func (cfg ConfigReader) GetMongoDB()  (*mongo.Client, *mongo.Database) {
 		log.Fatal(err)
 	}
 	return client, client.Database(dbName)
+}
+
+func (cfg ConfigReader) GetAPIPort() string {
+	portStr := cfg.ConfigValue["api"]["port"]
+	return portStr
 }

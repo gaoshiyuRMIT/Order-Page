@@ -17,36 +17,30 @@ func heartbeat(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Orders API is alive!")
 }
 
-func orders(w http.ResponseWriter, r *http.Request) {
-	orderMgr := models.NewOrderManager(utils.Config)
-	orders := orderMgr.GetAll()
-	cstmrMgr := models.NewCustomerManager(utils.Config)
-	cstmrMgr.FillInCustomerInfo(orders)
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(orders)
-}
 
 func searchOrders(w http.ResponseWriter, r *http.Request) {
 	queryVals := r.URL.Query()
 	var orderQuery models.OrderInfoQuery
+	pagination := models.NewPagination()
 	schema.NewDecoder().Decode(&orderQuery, queryVals)
+	schema.NewDecoder().Decode(pagination, queryVals)
 	
 	orderMgr := models.NewOrderManager(utils.Config)
-	orders := orderMgr.Search(&orderQuery)
+	orders := orderMgr.Search(&orderQuery, pagination)
 	cstmrMgr := models.NewCustomerManager(utils.Config)
 	cstmrMgr.FillInCustomerInfo(orders)
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	json.NewEncoder(w).Encode(orders)
 }
 
 func handleRequest() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.Path("/api/heartbeat").HandlerFunc(heartbeat).Methods("GET")
-	myRouter.Path("/api/orders").HandlerFunc(orders).Methods("GET")
 	myRouter.Path("/api/orders/search").HandlerFunc(searchOrders).Methods("GET")
-	log.Fatal(http.ListenAndServe(":5000", myRouter))
+	port := utils.Config.GetAPIPort()
+	log.Fatal(http.ListenAndServe(":" + port, myRouter))
 }
 
 func main() {

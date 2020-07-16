@@ -6,6 +6,7 @@ import (
 
 // OrderInfo displayable order info
 type OrderInfo struct {
+	OrderID         int
 	CreatedAt       time.Time
 	OrderName       string
 	CustomerID      string
@@ -22,10 +23,23 @@ func (oi *OrderInfo) SetCustomerInfo(ci CustomerInfo) {
 
 // OrderInfoQuery query for orders
 type OrderInfoQuery struct {
-	PartOfOrderName   string
-	PartOfProductName string
+	PartOfName        string
 	DateFrom          string // conforms to RFC3339
 	DateTill          string // conforms to RFC3339
+}
+
+// Pagination request for pagination
+type Pagination struct {
+	PageSize int
+	PageNo int
+}
+
+// Pagination construct
+func NewPagination() *Pagination {
+	return &Pagination{
+		PageSize: 5,
+		PageNo: 1,
+	}
 }
 
 // CustomerInfo customer info

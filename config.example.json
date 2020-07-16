@@ -2,5 +2,8 @@
     "db_connection": {
         "mongodb": "mongodb://username:password@host:port/database",
         "postgres": "host=<> dbname=<> user=<> password=<>"  
+    },
+    "api": {
+        "port": "8080"
     }
 }

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>VueJS</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>    
+    <script src="vue.js"></script>
+    <script src="jquery-3.5.1.js"></script>
+    <script src="moment.min.js"></script>
+    <script src="moment-timezone.min.js"></script>
+    <script src="config.js"></script>
+</head>
+<body>
+
+<div id="app" class="container">
+    <div class='form-group row'>
+        <button @click="search_orders(query)" class="btn btn-primary col-md-2">Search</button>
+        <input type="text" class="form-control col-md-4" v-model="name_part" placeholder="Search by part of order name or product name">
+    </div>
+    <div class='form-group row'>
+        <label class="control-label col-md-2">Created date</label>
+        <input class="form-control col-md-2" type="date" v-model="order_date_from">
+        <span class="col-md-1">-</span>
+        <input class="form-control col-md-2" type="date" v-model="order_date_to">
+    </div>
+    <button class="btn btn-default" @click="clear_query">Clear</button>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order Name</th>
+                <th>Customer Company</th>
+                <th>Customer Name</th>
+                <th>Order Date</th>
+                <th>Delivered Amount</th>
+                <th>Total Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr v-for="order in orders" :key="order.OrderID">
+                <td>{{ order.OrderName }}</td>
+                <td>{{ order.CustomerCompany }}</td>
+                <td>{{ order.CustomerName }}</td>
+                <td>{{ transform_tz(order.CreatedAt) }}</td>
+                <td>{{ order.DeliveredAmount }}</td>
+                <td>{{ order.TotalAmount }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <ul class="pagination">
+        <li class="page-item"><a class="page-link" @click="pageNo--">Previous</a></li>
+        <li class="page-item"><input class="page-link inactive" min="1" type="number" v-model="pageNo"></li>
+        <li class="page-item"><a class="page-link" @click="pageNo++">Next</a></li>
+    </ul>
+</div>
+
+<script src="main.js">
+</script>
+
+</body>
+</html>
