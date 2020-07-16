@@ -29,14 +29,17 @@ func searchOrders(w http.ResponseWriter, r *http.Request) {
 	orders, err := orderMgr.Search(&orderQuery, pagination)
 	if err != nil {
 		utils.WriteHttpError(w, err)
+		return
 	}
 	cstmrMgr, err := models.NewCustomerManager(utils.Config)
 	if err != nil {
 		utils.WriteHttpError(w, err)
+		return
 	}
 	err = cstmrMgr.FillInCustomerInfo(orders)
 	if err != nil {
 		utils.WriteHttpError(w, err)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")

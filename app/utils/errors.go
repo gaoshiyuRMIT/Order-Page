@@ -40,6 +40,7 @@ func NewIllegalArgument(msg string) *BaseAPIError {
 func WriteHttpError(w http.ResponseWriter, err error) {
 	if apiErr, ok := err.(APIError); ok {
 		http.Error(w, apiErr.Error(), apiErr.Status())
+	} else {
+		http.Error(w, err.Error(), 500)
 	}
-	http.Error(w, err.Error(), 500)
 }
